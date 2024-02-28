@@ -1,14 +1,13 @@
 package com.example.springreactproductapp.service;
 
 import com.example.springreactproductapp.entity.ProductoEntity;
+import com.example.springreactproductapp.exception.BusinessException;
 import com.example.springreactproductapp.payload.ProductoRequest;
+import com.example.springreactproductapp.payload.ProductoResponseCombinaciones;
 import com.example.springreactproductapp.repository.ProductoRepository;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class ProductoService {
@@ -68,12 +67,62 @@ public class ProductoService {
         return totalInventario;
     }
 
-    public List<List<ProductoEntity>> encontrarCombinaciones(double valorMaximo) {
+    public ProductoResponseCombinaciones encontrarCombinaciones(Double precioMaximo) {
+            List<ProductoEntity> productos = productoRepository.findByPrecioLessThanEqual(precioMaximo);
+            List<List<Object>> generateCombinations = generateCombinations(productos, precioMaximo);
+            return ProductoResponseCombinaciones.builder().maxCombinacionesProductos(generateCombinations).build();
+    }
 
-        List<List<ProductoEntity>> combinaciones = new ArrayList<>();
-        // calcular las combinaciones y devolver una lista de listas con los productos y la suma de precios
+    private List<List<Object>> generateCombinations(List<ProductoEntity> products, Double maxSumValue) {
+        if (products.size() < 2) {
+            throw new BusinessException("No hay suficientes productos para generar combinaciones");
+        }
+        PriorityQueue<List<Object>> pq = new PriorityQueue<>(new CombinationComparator());
+        int n = products.size();
+
+        for (int i = 0; i < n; i++) {
+            for (int j = i + 1; j < n; j++) {
+                Double sum = products.get(i).getPrecio() + products.get(j).getPrecio();
+                if (sum <= maxSumValue) {
+                    List<Object> combination = new ArrayList<>();
+                    combination.add(products.get(i).getNombre());
+                    combination.add(products.get(j).getNombre());
+                    combination.add(sum);
+                    pq.offer(combination);
+                }
+                if(n>=3){
+                    for (int k = j + 1; k < n; k++) {
+                        Double tripleSum = sum + products.get(k).getPrecio();
+                        if (tripleSum <= maxSumValue) {
+                            List<Object> combination = new ArrayList<>();
+                            combination.add(products.get(i).getNombre());
+                            combination.add(products.get(j).getNombre());
+                            combination.add(products.get(k).getNombre());
+                            combination.add(tripleSum);
+                            pq.offer(combination);
+                        }
+                    }
+                }
+            }
+        }
 
 
-        return combinaciones;
+        List<List<Object>> result = new ArrayList<>();
+        int count = 0;
+        while (!pq.isEmpty() && count < 5) {
+            result.add(pq.poll());
+            count++;
+        }
+
+        return result;
+    }
+
+    static class CombinationComparator implements Comparator<List<Object>> {
+        @Override
+        public int compare(List<Object> a, List<Object> b) {
+            double sumA = (double) a.get(a.size() - 1);
+            double sumB = (double) b.get(b.size() - 1);
+            return Double.compare(sumB, sumA);
+        }
     }
 }

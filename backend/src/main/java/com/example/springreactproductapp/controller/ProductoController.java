@@ -2,6 +2,7 @@ package com.example.springreactproductapp.controller;
 
 import com.example.springreactproductapp.entity.ProductoEntity;
 import com.example.springreactproductapp.payload.ProductoRequest;
+import com.example.springreactproductapp.payload.ProductoResponseCombinaciones;
 import com.example.springreactproductapp.service.ProductoService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -9,7 +10,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Objects;
 
 @RestController
 @RequestMapping("/api/v1/productos")
@@ -22,6 +22,12 @@ public class ProductoController {
     @GetMapping
     public ResponseEntity<List<ProductoEntity>> obtenerProductos() {
         List<ProductoEntity> productos = productoService.listarProductos();
+        return new ResponseEntity<>(productos, HttpStatus.OK);
+    }
+
+    @GetMapping("/productosCombinaciones")
+    public ResponseEntity<ProductoResponseCombinaciones> obtenerProductoCombinaciones(@RequestParam Double precioMaximo) {
+        ProductoResponseCombinaciones productos = productoService.encontrarCombinaciones(precioMaximo);
         return new ResponseEntity<>(productos, HttpStatus.OK);
     }
     @PostMapping
