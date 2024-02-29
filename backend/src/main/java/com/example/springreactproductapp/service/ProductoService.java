@@ -2,6 +2,7 @@ package com.example.springreactproductapp.service;
 
 import com.example.springreactproductapp.entity.ProductoEntity;
 import com.example.springreactproductapp.exception.BusinessException;
+import com.example.springreactproductapp.payload.ProductoEstadisticaResponse;
 import com.example.springreactproductapp.payload.ProductoRequest;
 import com.example.springreactproductapp.payload.ProductoResponseCombinaciones;
 import com.example.springreactproductapp.repository.ProductoRepository;
@@ -58,13 +59,13 @@ public class ProductoService {
         }
         return productoRepository.save(productoEntity);
     }
-    public double calcularValorTotalInventario() {
-        List<ProductoEntity> productos = productoRepository.findAll();
-        double totalInventario = 0.0;
-        for (ProductoEntity producto : productos) {
-            totalInventario += producto.getPrecio() * producto.getStock();
-        }
-        return totalInventario;
+    public ProductoEstadisticaResponse calcularEstadisticas() {
+        ProductoEntity maxInventoryProduct = productoRepository.findMaxInventoryProduct();
+        Double totalInventoryValue = productoRepository.findTotalInventoryValue();
+        return ProductoEstadisticaResponse.builder()
+                .maximoProducto(maxInventoryProduct)
+                .valorTotalInventario(totalInventoryValue)
+                .build();
     }
 
     public ProductoResponseCombinaciones encontrarCombinaciones(Double precioMaximo) {
