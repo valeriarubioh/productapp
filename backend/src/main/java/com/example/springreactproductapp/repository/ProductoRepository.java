@@ -18,4 +18,6 @@ public interface ProductoRepository extends JpaRepository<ProductoEntity,Long> {
     @Query("SELECT p FROM ProductoEntity p \n" +
             "WHERE p.stock * p.precio = (SELECT MAX(p2.stock * p2.precio) FROM ProductoEntity p2)")
     ProductoEntity findMaxInventoryProduct();
+
+    Optional<ProductoEntity> findByNombre(String nombre);
 }
