@@ -37,22 +37,27 @@ const App = () => {
   }, []);
 
   return (
-    <div>
+    <div className="container">
       <Router>
-        <h1>Product Management App</h1>
+        <h1 className="display-4">Product Management App</h1>
         <Routes>
           <Route path="/" element={<ProductArchive />} />
         </Routes>
       </Router>
-
-      <h2>Sabías que...</h2>
-      <ul>
-        {facts.map((fact, index) => (
-          <li key={index}>{fact}</li>
-        ))}
-      </ul>
-      <h2>Useless Fact of the Day</h2>
+  
+      <div className="mt-4">
+        <h2 className="mb-3">Sabías que...</h2>
+        <ul>
+          {facts.map((fact, index) => (
+            <li key={index}>{fact}</li>
+          ))}
+        </ul>
+      </div>
+  
+      <div className="mt-4">
+        <h2 className="mb-3">Useless Fact of the Day</h2>
         <p>{uselessFact}</p>
+      </div>
     </div>
   );
 };
